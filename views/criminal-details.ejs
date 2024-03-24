@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Criminal Details</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/swiper/swiper-bundle.min.css"
+    />
+  </head>
+  <body class="bg-gray-100 p-6">
+    <div class="mt-6">
+      <a
+        href="/"
+        class="inline-block px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-700"
+        >Back to Wanted List</a
+      >
+    </div>
+    <div class="max-w-3xl mx-auto">
+      <h1 class="text-3xl font-bold mb-6">Criminal Details</h1>
+
+      <h2 class="text-xl font-semibold mb-4"><%= criminal.title %></h2>
+
+      <% if (criminal.warning_message !== null) { %>
+      <p class="mb-2 text-red-600 font-bold">
+        <strong>WARNING:</strong> <%= criminal.warning_message || '' %>
+      </p>
+      <% } %>
+
+      <p class="mb-2">
+        <strong class="font-semibold">Subjects:</strong> <%=
+        criminal.subjects.join(', ') || '' %>
+      </p>
+
+      <p class="mb-2">
+        <strong class="font-semibold">REWARD:</strong> <%= criminal.reward_text
+        || 'NA' %>
+      </p>
+
+      <!-- Aliases -->
+      <% if (criminal.aliases !== null && criminal.aliases.length > 0) { %>
+      <p class="mb-2">
+        <strong class="font-semibold">Aliases:</strong> <%=
+        criminal.aliases.join(', ') %>
+      </p>
+      <% } else { %>
+      <p class="mb-2"><strong class="font-semibold">Aliases:</strong> NA</p>
+      <% } %>
+
+      <!-- Basic Information -->
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <p class="mb-2">
+            <strong class="font-semibold">Sex:</strong> <%= criminal.sex || 'NA'
+            %>
+          </p>
+          <p class="mb-2">
+            <strong class="font-semibold">Race:</strong> <%= criminal.race ||
+            'NA' %>
+          </p>
+          <p class="mb-2">
+            <strong class="font-semibold">Nationality:</strong> <%=
+            criminal.nationality || 'NA' %>
+          </p>
+          <p class="mb-2">
+            <strong class="font-semibold">Age Range:</strong> <%=
+            criminal.age_range || 'NA' %>
+          </p>
+        </div>
+        <div>
+          <!-- Height -->
+          <% if ((criminal.height_min && criminal.height_max) === null) { %>
+          <p class="mb-2"><strong class="font-semibold">Height:</strong> NA</p>
+          <% } else { %>
+          <p class="mb-2">
+            <strong class="font-semibold">Height:</strong> <%=
+            criminal.height_min || 'NA' %> to <%= criminal.height_max || 'NA' %>
+            inches
+          </p>
+          <% } %>
+
+          <p class="mb-2">
+            <strong class="font-semibold">Weight:</strong> <%= criminal.weight
+            || 'NA' %>
+          </p>
+          <p class="mb-2">
+            <strong class="font-semibold">Eye Color:</strong> <%= criminal.eyes
+            || 'NA' %>
+          </p>
+          <p class="mb-2">
+            <strong class="font-semibold">Hair Color:</strong> <%=
+            criminal.hair_raw || 'NA' %>
+          </p>
+        </div>
+      </div>
+
+      <div class="container">
+        <% if (criminal.scars_and_marks !== null) { %>
+        <p class="mt-4">
+          <strong class="font-bold">Scars and Marks:</strong>
+          <%= criminal.scars_and_marks.replace(/<\/?p>/g, '') || 'NA' %>
+        </p>
+        <% } else { %>
+        <p class="mt-4">
+          <strong class="font-bold">Scars and Marks:</strong> NA
+        </p>
+        <% } %> <% if (criminal.languages !== null && criminal.languages.length
+        > 0) { %>
+        <p class="mt-4">
+          <strong class="font-bold">Languages:</strong> <%=
+          criminal.languages.join(', ') %>
+        </p>
+        <% } else { %>
+        <p class="mt-4"><strong class="font-bold">Languages:</strong> NA</p>
+        <% } %>
+        <p class="mt-4">
+          <strong class="font-bold">Description:</strong> <%=
+          criminal.description || 'NA' %>
+        </p>
+        <% if (criminal.caution !== null) { %>
+        <p class="mt-4">
+          <strong class="font-bold">Caution:</strong> <%=
+          criminal.caution.replace(/<\/?p>/g, '') %>
+        </p>
+        <% } else { %>
+        <p class="mt-4"><strong class="font-bold">Caution:</strong> NA</p>
+        <% } %> <% if (criminal.details !== null) { %>
+        <p class="mt-4">
+          <strong class="font-bold">Details:</strong>
+          <%= criminal.details.replace(/<\/?p>/g, '') || 'NA' %>
+        </p>
+        <% } else { %>
+        <p class="mt-4"><strong class="font-bold">Details:</strong> NA</p>
+        <% } %> <% if (criminal.remarks !== null) { %>
+        <p class="mt-4">
+          <strong class="font-bold">Remarks:</strong>
+          <%= criminal.remarks.replace(/<\/?p>/g, '') || 'NA' %>
+        </p>
+        <% } else { %>
+        <p class="mt-4"><strong class="font-bold">Remarks:</strong> NA</p>
+        <% } %> <% if (criminal.occupations !== null &&
+        criminal.occupations.length > 0) { %>
+        <p class="mt-4">
+          <strong class="font-bold">Occupations:</strong> <%=
+          criminal.occupations %>
+        </p>
+        <% } else { %>
+        <p class="mt-4"><strong class="font-bold">Occupations:</strong> NA</p>
+        <% } %>
+        <!-- Images -->
+        <div class="swiper-container relative">
+          <div class="swiper-wrapper">
+            <!-- Slides -->
+            <% criminal.images.forEach(function(image) { %>
+            <div class="swiper-slide">
+              <img
+                src="<%= image.large || 'NA' %>"
+                alt="<%= image.caption || 'NA' %>"
+              />
+            </div>
+            <% }) %>
+          </div>
+          <!-- Navigation buttons -->
+          <div
+            class="absolute top-1/2 transform -translate-y-1/2 flex items-center"
+          >
+            <button
+              class="swiper-button-prev bg-black text-white rounded-full w-10 h-10 flex justify-center items-center mr-4"
+            >
+              <svg
+                class="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M15 18l-6-6 6-6"></path>
+              </svg>
+            </button>
+            <button
+              class="swiper-button-next bg-black text-white rounded-full w-10 h-10 flex justify-center items-center"
+            >
+              <svg
+                class="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M9 18l6-6-6-6"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Additional details -->
+        <p class="mt-4">
+          <strong class="font-bold">Publication Date:</strong>
+          <%= criminal.publication ? new
+          Date(criminal.publication).toDateString() : 'NA' %>
+        </p>
+        <p class="mt-4">
+          <strong class="font-bold">URL:</strong>
+          <a href="<%= criminal.url || '#' %>"><%= criminal.url || 'NA' %></a>
+        </p>
+        <p class="mt-4">
+          <strong class="font-bold">File:</strong>
+          <%= criminal.files && criminal.files.length > 0 ?
+          criminal.files[0].name : 'NA' %>:
+          <a
+            href="<%= criminal.files && criminal.files.length > 0 ? criminal.files[0].url : '#' %>"
+            >Download</a
+          >
+        </p>
+      </div>
+    </div>
+    <!-- Swiper JS -->
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+
+    <!-- Initialize Swiper -->
+    <script>
+      var swiper = new Swiper(".swiper-container", {
+        slidesPerView: 1,
+        spaceBetween: 30,
+        navigation: {
+          nextEl: ".swiper-button-next",
+          prevEl: ".swiper-button-prev",
+        },
+      });
+    </script>
+  </body>
+</html>

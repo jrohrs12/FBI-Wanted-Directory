@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FBI Wanted Criminals</title>
+  </head>
+  <body>
+    <h1>FBI Wanted Criminals</h1>
+
+    <ul>
+      <% criminals.forEach(criminal => { %>
+      <li>
+        <a href="/criminal/<%= criminal.uid %>"> <%= criminal.title %> </a>
+      </li>
+      <% }); %>
+    </ul>
+  </body>
+</html>
