@@ -5,16 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Criminal Details</title>
     <link
-      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
     <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
       rel="stylesheet"
-      href="https://unpkg.com/swiper/swiper-bundle.min.css"
     />
   </head>
   <body class="bg-gray-100 p-6">
-    <div class="mt-6">
+    <div class="m-2">
       <a
         href="/"
         class="inline-block px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-700"
@@ -23,9 +23,8 @@
     </div>
     <div class="max-w-3xl mx-auto">
       <h1 class="text-3xl font-bold mb-6">Criminal Details</h1>
-
-      <h2 class="text-xl font-semibold mb-4"><%= criminal.title %></h2>
-
+      <% if (criminal !== undefined) { %>
+      <h2 class="text-xl font-semibold mb-4"><%= criminal.title || '' %></h2>
       <% if (criminal.warning_message !== null) { %>
       <p class="mb-2 text-red-600 font-bold">
         <strong>WARNING:</strong> <%= criminal.warning_message || '' %>
@@ -152,52 +151,48 @@
         <% } else { %>
         <p class="mt-4"><strong class="font-bold">Occupations:</strong> NA</p>
         <% } %>
-        <!-- Images -->
-        <div class="swiper-container relative">
-          <div class="swiper-wrapper">
-            <!-- Slides -->
-            <% criminal.images.forEach(function(image) { %>
-            <div class="swiper-slide">
-              <img
-                src="<%= image.large || 'NA' %>"
-                alt="<%= image.caption || 'NA' %>"
-              />
-            </div>
-            <% }) %>
-          </div>
-          <!-- Navigation buttons -->
+
+        <!-- Image carousel -->
+        <div class="container">
           <div
-            class="absolute top-1/2 transform -translate-y-1/2 flex items-center"
+            id="carouselExampleControls"
+            class="carousel slide"
+            data-bs-ride="carousel"
           >
+            <div class="carousel-inner">
+              <% criminal.images.forEach(function(image, index) { %>
+              <div class="carousel-item <% if (index === 0) { %>active<% } %>">
+                <img
+                  src="<%= image.large || 'NA' %>"
+                  alt="<%= image.caption || 'NA' %>"
+                  class="d-block w-full object-contain h-96"
+                />
+              </div>
+              <% }) %>
+            </div>
             <button
-              class="swiper-button-prev bg-black text-white rounded-full w-10 h-10 flex justify-center items-center mr-4"
+              class="carousel-control-prev"
+              type="button"
+              data-bs-target="#carouselExampleControls"
+              data-bs-slide="prev"
             >
-              <svg
-                class="w-4 h-4"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M15 18l-6-6 6-6"></path>
-              </svg>
+              <span
+                class="carousel-control-prev-icon"
+                aria-hidden="true"
+              ></span>
+              <span class="visually-hidden">Previous</span>
             </button>
             <button
-              class="swiper-button-next bg-black text-white rounded-full w-10 h-10 flex justify-center items-center"
+              class="carousel-control-next"
+              type="button"
+              data-bs-target="#carouselExampleControls"
+              data-bs-slide="next"
             >
-              <svg
-                class="w-4 h-4"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M9 18l6-6-6-6"></path>
-              </svg>
+              <span
+                class="carousel-control-next-icon"
+                aria-hidden="true"
+              ></span>
+              <span class="visually-hidden">Next</span>
             </button>
           </div>
         </div>
@@ -223,19 +218,9 @@
         </p>
       </div>
     </div>
-    <!-- Swiper JS -->
-    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <% } %>
 
-    <!-- Initialize Swiper -->
-    <script>
-      var swiper = new Swiper(".swiper-container", {
-        slidesPerView: 1,
-        spaceBetween: 30,
-        navigation: {
-          nextEl: ".swiper-button-next",
-          prevEl: ".swiper-button-prev",
-        },
-      });
-    </script>
+    <!-- Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>

@@ -4,16 +4,147 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FBI Wanted Criminals</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Include Tailwind CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
   </head>
-  <body>
-    <h1>FBI Wanted Criminals</h1>
+  <body class="bg-gray-100 p-6">
+    <h1 class="text-3xl font-bold mb-6">FBI Most Wanted</h1>
 
-    <ul>
-      <% criminals.forEach(criminal => { %>
-      <li>
-        <a href="/criminal/<%= criminal.uid %>"> <%= criminal.title %> </a>
-      </li>
-      <% }); %>
+    <ul
+      id="criminals-list"
+      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+    >
+      <!-- Criminals will be dynamically loaded here -->
     </ul>
+
+    <!-- Bootstrap Pagination -->
+    <nav aria-label="Page navigation">
+      <ul class="pagination">
+        <li class="page-item">
+          <a
+            href="#"
+            class="page-link"
+            id="previousButton"
+            onclick="goToPreviousPage()"
+            >Previous</a
+          >
+        </li>
+        <li class="page-item">
+          <a href="#" class="page-link" id="currentPage" data-page="1"></a>
+        </li>
+        <li class="page-item">
+          <a href="#" class="page-link" id="nextButton" onclick="goToNextPage()"
+            >Next</a
+          >
+        </li>
+      </ul>
+    </nav>
+
+    <script>
+      function loadPage(page) {
+        const totalPages = <%= totalPages %>
+        console.log(totalPages)
+        fetch(`https://api.fbi.gov/wanted/v1/list?page=${page}`)
+          .then((response) => response.json())
+          .then((data) => {
+            // Update the criminals list with the new data
+            const criminalsList = document.getElementById("criminals-list");
+            criminalsList.innerHTML = "";
+
+            data.items.forEach((criminal) => {
+                // Create anchor tag for the card
+                const cardLink = document.createElement("a");
+                cardLink.href = `/criminal/${criminal.uid}`; // Assuming this is the URL for the details page
+                cardLink.classList.add("block", "bg-white", "shadow", "rounded-lg", "overflow-hidden");
+
+                // Create card element
+                const card = document.createElement("div");
+                card.classList.add("p-4");
+
+                // Criminal image
+                if (criminal.images && criminal.images.length > 0) {
+                    const image = document.createElement("img");
+                    image.src = criminal.images[0].thumb; // Assuming the first image in the array is the thumbnail
+                    image.classList.add("w-full", "h-64", "object-cover", "object-center");
+                    card.appendChild(image);
+                }
+
+                // Criminal details
+                const details = document.createElement("div");
+
+                // Criminal title
+                const title = document.createElement("h2");
+                title.classList.add("text-xl", "font-bold", "mb-2");
+                title.textContent = criminal.title; // Assuming criminal object has a title property
+                details.appendChild(title);
+
+                // Criminal description
+                const description = document.createElement("p");
+                description.classList.add("text-gray-700", "text-base");
+                description.textContent = criminal.description; // Assuming criminal object has a description property
+                details.appendChild(description);
+
+                card.appendChild(details);
+                cardLink.appendChild(card);
+                criminalsList.appendChild(cardLink);
+            });
+
+            document.getElementById("currentPage").innerText = page;
+
+            console.log(page);
+
+            // Disable previous button if on the first page
+            if (page === 1) {
+              document
+                .getElementById("previousButton")
+                .classList.add("disabled");
+            } else {
+              document
+                .getElementById("previousButton")
+                .classList.remove("disabled");
+            }
+
+            if (page === totalPages) {
+                document.getElementById("nextButton").classList.add("disabled")
+            } else {
+                document.getElementById("nextButton").classList.remove("disabled")
+            }
+
+
+          });
+      }
+
+      function goToNextPage() {
+        var currentPage = Number(
+          document.getElementById("currentPage").getAttribute("data-page")
+        );
+        loadPage(currentPage + 1);
+        document
+          .getElementById("currentPage")
+          .setAttribute("data-page", currentPage + 1);
+      }
+
+      function goToPreviousPage() {
+        var currentPage = Number(
+          document.getElementById("currentPage").getAttribute("data-page")
+        );
+        if (currentPage > 1) {
+          loadPage(currentPage - 1);
+          document
+            .getElementById("currentPage")
+            .setAttribute("data-page", currentPage - 1);
+        }
+      }
+
+      // load first page automatically on initial load
+      loadPage(1);
+    </script>
   </body>
 </html>
