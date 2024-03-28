@@ -59,9 +59,10 @@
             %>
           </p>
           <p class="mb-2">
-            <strong class="font-semibold">Race:</strong> <%= criminal.race ||
-            'NA' %>
+            <strong class="font-semibold">Race:</strong> <%= (criminal.race ||
+            'NA').charAt(0).toUpperCase() + (criminal.race || 'NA').slice(1) %>
           </p>
+
           <p class="mb-2">
             <strong class="font-semibold">Nationality:</strong> <%=
             criminal.nationality || 'NA' %>
@@ -73,13 +74,18 @@
         </div>
         <div>
           <!-- Height -->
-          <% if ((criminal.height_min && criminal.height_max) === null) { %>
+          <% if (criminal.height_min === null && criminal.height_max === null) {
+          %>
           <p class="mb-2"><strong class="font-semibold">Height:</strong> NA</p>
+          <% } else if (criminal.height_min === criminal.height_max) { %>
+          <p class="mb-2">
+            <strong class="font-semibold">Height:</strong> <%=
+            criminal.height_min %>
+          </p>
           <% } else { %>
           <p class="mb-2">
             <strong class="font-semibold">Height:</strong> <%=
-            criminal.height_min || 'NA' %> to <%= criminal.height_max || 'NA' %>
-            inches
+            criminal.height_min %> to <%= criminal.height_max %>
           </p>
           <% } %>
 
@@ -154,46 +160,55 @@
 
         <!-- Image carousel -->
         <div class="container">
-          <div
-            id="carouselExampleControls"
-            class="carousel slide"
-            data-bs-ride="carousel"
-          >
-            <div class="carousel-inner">
-              <% criminal.images.forEach(function(image, index) { %>
-              <div class="carousel-item <% if (index === 0) { %>active<% } %>">
-                <img
-                  src="<%= image.large || 'NA' %>"
-                  alt="<%= image.caption || 'NA' %>"
-                  class="d-block w-full object-contain h-96"
-                />
+          <div class="card">
+            <div class="card-body">
+              <div
+                id="carouselExampleControls"
+                class="carousel slide"
+                data-bs-ride="carousel"
+              >
+                <div class="carousel-inner">
+                  <% criminal.images.forEach(function(image, index) { %>
+                  <div
+                    class="carousel-item <% if (index === 0) { %>active<% } %>"
+                  >
+                    <img
+                      src="<%= image.large || 'NA' %>"
+                      alt="<%= image.caption || 'NA' %>"
+                      class="d-block w-full object-contain h-96"
+                    />
+                    <p class="flex justify-center">
+                      <%= image.caption || 'NA' %>
+                    </p>
+                  </div>
+                  <% }) %>
+                </div>
+                <button
+                  class="carousel-control-prev bg-gray-400"
+                  type="button"
+                  data-bs-target="#carouselExampleControls"
+                  data-bs-slide="prev"
+                >
+                  <span
+                    class="carousel-control-prev-icon"
+                    aria-hidden="true"
+                  ></span>
+                  <span class="visually-hidden">Previous</span>
+                </button>
+                <button
+                  class="carousel-control-next bg-gray-400"
+                  type="button"
+                  data-bs-target="#carouselExampleControls"
+                  data-bs-slide="next"
+                >
+                  <span
+                    class="carousel-control-next-icon"
+                    aria-hidden="true"
+                  ></span>
+                  <span class="visually-hidden">Next</span>
+                </button>
               </div>
-              <% }) %>
             </div>
-            <button
-              class="carousel-control-prev"
-              type="button"
-              data-bs-target="#carouselExampleControls"
-              data-bs-slide="prev"
-            >
-              <span
-                class="carousel-control-prev-icon"
-                aria-hidden="true"
-              ></span>
-              <span class="visually-hidden">Previous</span>
-            </button>
-            <button
-              class="carousel-control-next"
-              type="button"
-              data-bs-target="#carouselExampleControls"
-              data-bs-slide="next"
-            >
-              <span
-                class="carousel-control-next-icon"
-                aria-hidden="true"
-              ></span>
-              <span class="visually-hidden">Next</span>
-            </button>
           </div>
         </div>
 
@@ -205,7 +220,9 @@
         </p>
         <p class="mt-4">
           <strong class="font-bold">URL:</strong>
-          <a href="<%= criminal.url || '#' %>"><%= criminal.url || 'NA' %></a>
+          <a href="<%= criminal.url || '#' %>" class="text-blue-500"
+            ><%= criminal.url || 'NA' %></a
+          >
         </p>
         <p class="mt-4">
           <strong class="font-bold">File:</strong>
@@ -213,6 +230,7 @@
           criminal.files[0].name : 'NA' %>:
           <a
             href="<%= criminal.files && criminal.files.length > 0 ? criminal.files[0].url : '#' %>"
+            class="text-blue-500"
             >Download</a
           >
         </p>

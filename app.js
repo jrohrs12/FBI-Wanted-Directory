@@ -19,7 +19,7 @@ app.get("/", async (req, res) => {
 
     res.render("index", { criminals: data.items, currentPage, totalPages });
   } catch (error) {
-    console.error("Error fetching data:", error);
+    console.error("Error fetching data:", res);
     res.status(500).send("Error fetching data");
   }
 });
@@ -35,6 +35,19 @@ app.get("/criminal/:id", async (req, res) => {
     const criminal = await response.json();
     console.log(criminal);
 
+    // Convert height from inches to feet and inches
+    criminal.height_min = convertToFeetAndInches(criminal.height_min);
+    criminal.height_max = convertToFeetAndInches(criminal.height_max);
+
+    // Process text containing links
+    if (criminal.caution) {
+      criminal.caution = processLinksInText(criminal.caution);
+    }
+
+    if (criminal.details) {
+      criminal.details = processLinksInText(criminal.details);
+    }
+
     // Render criminal-details.ejs template with the fetched data
     res.render("criminal-details", { criminal });
   } catch (error) {
@@ -42,6 +55,28 @@ app.get("/criminal/:id", async (req, res) => {
     res.status(500).send("Error fetching data");
   }
 });
+
+// Function to convert inches to feet and inches
+function convertToFeetAndInches(inches) {
+  if (inches === null) return "NA";
+
+  const feet = Math.floor(inches / 12);
+  const remainingInches = inches % 12;
+
+  if (feet === 0) {
+    return `${remainingInches} inches`;
+  } else if (remainingInches === 0) {
+    return `${feet} feet`;
+  } else {
+    return `${feet} feet ${remainingInches} inches`;
+  }
+}
+
+// Function to process text containing links
+function processLinksInText(text) {
+  // Replace links in the text with the inner text of the anchor tags
+  return text.replace(/<a.*?>(.*?)<\/a>/g, "$1");
+}
 
 // Start the server
 const PORT = process.env.PORT || 3000;

@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FBI Wanted Criminals</title>
+    <!-- Include Bootstrap CSS -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -15,17 +16,29 @@
     />
   </head>
   <body class="bg-gray-100 p-6">
-    <h1 class="text-3xl font-bold mb-6">FBI Most Wanted</h1>
+    <h1 class="text-3xl font-bold mb-6">FBI Most Wanted Directory</h1>
+
+    <!-- Search Input Field -->
+    <input
+      type="text"
+      id="searchInput"
+      class="form-control mb-4"
+      placeholder="Search wanted..."
+      oninput="sanitizeAndFilter(this.value)"
+    />
 
     <ul
       id="criminals-list"
-      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 p-4 mb-4"
     >
       <!-- Criminals will be dynamically loaded here -->
     </ul>
 
     <!-- Bootstrap Pagination -->
-    <nav aria-label="Page navigation">
+    <nav
+      aria-label="Page navigation"
+      class="flex justify-center fixed bottom-0 left-0 right-0 bg-white p-2 shadow-lg"
+    >
       <ul class="pagination">
         <li class="page-item">
           <a
@@ -48,103 +61,183 @@
     </nav>
 
     <script>
-      function loadPage(page) {
-        const totalPages = <%= totalPages %>
-        console.log(totalPages)
-        fetch(`https://api.fbi.gov/wanted/v1/list?page=${page}`)
-          .then((response) => response.json())
-          .then((data) => {
-            // Update the criminals list with the new data
-            const criminalsList = document.getElementById("criminals-list");
-            criminalsList.innerHTML = "";
+      let allCriminals = []; // Store all criminals fetched from API
 
-            data.items.forEach((criminal) => {
-                // Create anchor tag for the card
-                const cardLink = document.createElement("a");
-                cardLink.href = `/criminal/${criminal.uid}`; // Assuming this is the URL for the details page
-                cardLink.classList.add("block", "bg-white", "shadow", "rounded-lg", "overflow-hidden");
+      // Load page with the current page number stored in session storage
+      function loadPage() {
+        const page = sessionStorage.getItem("currentPage") || 1; // Get the current page from session storage or default to 1 if not set
+        const totalPages = sessionStorage.getItem("totalPages") || 1; // Get the total pages from session storage or default to 1 if not set
 
-                // Create card element
-                const card = document.createElement("div");
-                card.classList.add("p-4");
+        // Filter criminals based on search query
+        const searchQuery = sessionStorage.getItem("searchQuery") || "";
+        const filteredCriminals = allCriminals.filter((criminal) =>
+          criminal.title.toLowerCase().includes(searchQuery.toLowerCase())
+        );
 
-                // Criminal image
-                if (criminal.images && criminal.images.length > 0) {
-                    const image = document.createElement("img");
-                    image.src = criminal.images[0].thumb; // Assuming the first image in the array is the thumbnail
-                    image.classList.add("w-full", "h-64", "object-cover", "object-center");
-                    card.appendChild(image);
-                }
+        // Slice criminals for the current page
+        const startIndex = (page - 1) * 10;
+        const endIndex = Math.min(startIndex + 10, filteredCriminals.length);
+        const currentPageCriminals = filteredCriminals.slice(
+          startIndex,
+          endIndex
+        );
 
-                // Criminal details
-                const details = document.createElement("div");
+        // Update the criminals list with the new data
+        const criminalsList = document.getElementById("criminals-list");
+        criminalsList.innerHTML = "";
 
-                // Criminal title
-                const title = document.createElement("h2");
-                title.classList.add("text-xl", "font-bold", "mb-2");
-                title.textContent = criminal.title; // Assuming criminal object has a title property
-                details.appendChild(title);
+        currentPageCriminals.forEach((criminal) => {
+          // Create and append criminals' details
+          // Create anchor tag for the card
+          const cardLink = document.createElement("a");
+          cardLink.href = `/criminal/${criminal.uid}`; // Assuming this is the URL for the details page
+          cardLink.classList.add(
+            "block",
+            "bg-white",
+            "shadow",
+            "rounded-lg",
+            "overflow-hidden"
+          );
 
-                // Criminal description
-                const description = document.createElement("p");
-                description.classList.add("text-gray-700", "text-base");
-                description.textContent = criminal.description; // Assuming criminal object has a description property
-                details.appendChild(description);
+          // Create card element
+          const card = document.createElement("div");
+          card.classList.add("p-4");
 
-                card.appendChild(details);
-                cardLink.appendChild(card);
-                criminalsList.appendChild(cardLink);
-            });
+          // Criminal image
+          if (criminal.images && criminal.images.length > 0) {
+            const image = document.createElement("img");
+            image.src = criminal.images[0].thumb; // Assuming the first image in the array is the thumbnail
+            image.classList.add(
+              "w-full",
+              "h-64",
+              "object-contain",
+              "object-center"
+            );
+            card.appendChild(image);
+          }
 
-            document.getElementById("currentPage").innerText = page;
+          // Criminal details
+          const details = document.createElement("div");
 
-            console.log(page);
+          // Criminal title
+          const title = document.createElement("h2");
+          title.classList.add("text-xl", "font-bold", "mb-2");
+          title.textContent = criminal.title; // Assuming criminal object has a title property
+          details.appendChild(title);
 
-            // Disable previous button if on the first page
-            if (page === 1) {
-              document
-                .getElementById("previousButton")
-                .classList.add("disabled");
-            } else {
-              document
-                .getElementById("previousButton")
-                .classList.remove("disabled");
-            }
+          // Criminal subject message
+          if (criminal.subjects) {
+            const subjects = document.createElement("p");
+            subjects.classList.add("text-red-500", "font-semibold", "mb-2");
+            subjects.textContent = criminal.subjects.join(", ");
+            details.appendChild(subjects);
+          }
 
-            if (page === totalPages) {
-                document.getElementById("nextButton").classList.add("disabled")
-            } else {
-                document.getElementById("nextButton").classList.remove("disabled")
-            }
+          card.appendChild(details);
+          cardLink.appendChild(card);
+          criminalsList.appendChild(cardLink);
+        });
 
+        // Update the current page number
+        document.getElementById("currentPage").innerText = page;
 
-          });
+        // Disable previous button if on the first page
+        if (page == 1) {
+          document.getElementById("previousButton").classList.add("disabled");
+        } else {
+          document
+            .getElementById("previousButton")
+            .classList.remove("disabled");
+        }
+
+        if (page == totalPages) {
+          document.getElementById("nextButton").classList.add("disabled");
+        } else {
+          document.getElementById("nextButton").classList.remove("disabled");
+        }
       }
 
       function goToNextPage() {
         var currentPage = Number(
-          document.getElementById("currentPage").getAttribute("data-page")
+          document.getElementById("currentPage").innerText
         );
-        loadPage(currentPage + 1);
-        document
-          .getElementById("currentPage")
-          .setAttribute("data-page", currentPage + 1);
+        sessionStorage.setItem("currentPage", currentPage + 1); // Store the current page in session storage
+        loadPage();
       }
 
       function goToPreviousPage() {
         var currentPage = Number(
-          document.getElementById("currentPage").getAttribute("data-page")
+          document.getElementById("currentPage").innerText
         );
         if (currentPage > 1) {
-          loadPage(currentPage - 1);
-          document
-            .getElementById("currentPage")
-            .setAttribute("data-page", currentPage - 1);
+          sessionStorage.setItem("currentPage", currentPage - 1); // Store the current page in session storage
+          loadPage();
         }
       }
 
-      // load first page automatically on initial load
-      loadPage(1);
+      function filterCriminals(query) {
+        sessionStorage.setItem("searchQuery", query);
+        sessionStorage.setItem("currentPage", 1); // Reset current page to 1 when searching
+
+        // Filter criminals based on the search query
+        const filteredCriminals = allCriminals.filter((criminal) =>
+          criminal.title.toLowerCase().includes(query.toLowerCase())
+        );
+
+        // Update total pages based on the filtered results
+        const totalPages = Math.ceil(filteredCriminals.length / 10); // Assuming 10 items per page
+        sessionStorage.setItem("totalPages", totalPages);
+
+        loadPage(); // Load the first page with the new search query
+      }
+
+      // Function to sanitize and filter input
+      function sanitizeAndFilter(input) {
+        // Sanitize input to prevent XSS attacks or other malicious input
+        const sanitizedInput = input
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+        filterCriminals(sanitizedInput); // Filter criminals with sanitized input
+      }
+
+      // Fetch all criminals data
+      fetch("https://api.fbi.gov/wanted/v1/list")
+        .then((response) => response.json())
+        .then((firstPageData) => {
+          const totalItems = firstPageData.total;
+          const totalPages = Math.ceil(totalItems / 10); // Assuming 10 items per page
+          const fetchRequests = [];
+
+          // Generate fetch requests for each page
+          for (let page = 1; page <= totalPages; page++) {
+            fetchRequests.push(
+              fetch(`https://api.fbi.gov/wanted/v1/list?page=${page}`)
+            );
+          }
+
+          // Send requests for each page sequentially
+          Promise.all(fetchRequests)
+            .then((responses) =>
+              Promise.all(responses.map((response) => response.json()))
+            )
+            .then((pageData) => {
+              const totalItems = pageData.flatMap((page) => page.items); // Combine items from all pages
+              sessionStorage.setItem("totalPages", totalPages);
+              // Process and display the aggregated data
+              console.log(totalItems);
+              allCriminals = totalItems;
+              loadPage();
+              // Now you can proceed to use the aggregated data
+            })
+            .catch((error) => {
+              console.error("Error fetching criminals data:", error);
+              // Handle error if fetch fails
+            });
+        })
+        .catch((error) => {
+          console.error("Error fetching criminals data:", error);
+          // Handle error if fetch fails
+        });
     </script>
   </body>
 </html>
