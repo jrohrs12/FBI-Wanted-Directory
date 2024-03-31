@@ -29,7 +29,7 @@
 
     <ul
       id="criminals-list"
-      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 p-4 mb-4"
+      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 p-4 mb-4"
     >
       <!-- Criminals will be dynamically loaded here -->
     </ul>
@@ -70,6 +70,10 @@
 
         // Filter criminals based on search query
         const searchQuery = sessionStorage.getItem("searchQuery") || "";
+
+        // Make sure search input remains when coming back from details page
+        document.getElementById("searchInput").value = searchQuery;
+
         const filteredCriminals = allCriminals.filter((criminal) =>
           criminal.title.toLowerCase().includes(searchQuery.toLowerCase())
         );
@@ -150,7 +154,7 @@
             .classList.remove("disabled");
         }
 
-        if (page == totalPages) {
+        if (page == totalPages || filteredCriminals.length === 0) {
           document.getElementById("nextButton").classList.add("disabled");
         } else {
           document.getElementById("nextButton").classList.remove("disabled");
@@ -199,45 +203,27 @@
           .replace(/>/g, "&gt;");
         filterCriminals(sanitizedInput); // Filter criminals with sanitized input
       }
+      async function fetchData() {
+        try {
+          const response = await fetch("https://api.fbi.gov/wanted/v1/list");
+          const firstPageData = await response.json();
+          const total = firstPageData.total;
+          console.log(total);
+          sessionStorage.setItem("totalPages", Math.ceil(total / 10));
 
-      // Fetch all criminals data
-      fetch("https://api.fbi.gov/wanted/v1/list")
-        .then((response) => response.json())
-        .then((firstPageData) => {
-          const totalItems = firstPageData.total;
-          const totalPages = Math.ceil(totalItems / 10); // Assuming 10 items per page
-          const fetchRequests = [];
+          const secondResponse = await fetch(
+            `https://api.fbi.gov/wanted/v1/list?pageSize=${total}`
+          );
+          const allCriminalsData = await secondResponse.json();
+          allCriminals = allCriminalsData.items;
 
-          // Generate fetch requests for each page
-          for (let page = 1; page <= totalPages; page++) {
-            fetchRequests.push(
-              fetch(`https://api.fbi.gov/wanted/v1/list?page=${page}`)
-            );
-          }
+          loadPage();
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        }
+      }
 
-          // Send requests for each page sequentially
-          Promise.all(fetchRequests)
-            .then((responses) =>
-              Promise.all(responses.map((response) => response.json()))
-            )
-            .then((pageData) => {
-              const totalItems = pageData.flatMap((page) => page.items); // Combine items from all pages
-              sessionStorage.setItem("totalPages", totalPages);
-              // Process and display the aggregated data
-              console.log(totalItems);
-              allCriminals = totalItems;
-              loadPage();
-              // Now you can proceed to use the aggregated data
-            })
-            .catch((error) => {
-              console.error("Error fetching criminals data:", error);
-              // Handle error if fetch fails
-            });
-        })
-        .catch((error) => {
-          console.error("Error fetching criminals data:", error);
-          // Handle error if fetch fails
-        });
+      fetchData();
     </script>
   </body>
 </html>

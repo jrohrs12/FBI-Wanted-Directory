@@ -12,14 +12,16 @@ app.use(express.static("public"));
 // Define route to fetch and render wanted criminals
 app.get("/", async (req, res) => {
   try {
-    const response = await fetch("https://api.fbi.gov/wanted/v1/list");
+    const response = await fetch("https://api.fbi.gov/@wanted");
+
     const data = await response.json();
+
     const totalPages = Math.ceil(data.total / 10); // Calculate total pages based on the total number of items
     const currentPage = 1;
 
     res.render("index", { criminals: data.items, currentPage, totalPages });
   } catch (error) {
-    console.error("Error fetching data:", res);
+    console.error("Error fetching data:", error);
     res.status(500).send("Error fetching data");
   }
 });
